@@ -8,6 +8,7 @@ import (
 	"github.com/gocolly/colly"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -147,7 +148,14 @@ func SearchArticles(searchText string, articleIndex map[string][]string) {
 		}
 	}
 
-	DisplaySearchResults(percentMatchHeap.getTopN(maxSearchResults))
+	// getTopN gives us the top 10 urls by percentMatch **not guaranteed to be in sorted order**
+	// so a final sort on the top 10 is needed before showing to the user
+	results := percentMatchHeap.getTopN(maxSearchResults)
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].PercentMatch > results[j].PercentMatch
+	})
+
+	DisplaySearchResults(results)
 }
 
 func DisplaySearchResults(results []UrlMatch) {
